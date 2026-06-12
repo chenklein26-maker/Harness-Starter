@@ -70,7 +70,7 @@ cp -r .claude/ CLAUDE.md .lsp.json /path/to/your-project/
 
 ## 整体架构
 
-一条对话的生命周期中，Hook 按以下顺序自动触发：
+一条对话的生命周期中，Hook 按以下顺序自动触发，GC Agent 独立运行：
 
 ```mermaid
 flowchart LR
@@ -80,15 +80,18 @@ flowchart LR
   D --> E[Stop]
   E --> F[SessionStart<br/>下次对话]
   G[PreCompact] -.->|压缩前| D
+  H[GC Agent<br/>/loop / Routine] -.->|独立定时| I[gc-scan.mjs]
+  I -.->|写 LOG.md| F
 ```
 
-| Hook | 时机 | 职责 |
+| Hook / Agent | 时机 | 职责 |
 |------|------|------|
 | PreToolUse | 工具执行前 | 安全拦截：.env 保护、危险命令 |
 | PostToolUse | 编辑完成后 | 自动格式化代码 |
-| PreCompact | 上下文压缩前 | 保存会话关键状态 |
-| Stop | 每次响应后 | 审查变更、生成报告 |
-| SessionStart | 新对话开始 | 注入 git 状态、历史审查 |
+| PreCompact | 上下文压缩前 | 保存 Loop 状态 + 当前进度 |
+| Stop | 每次响应后 | 审查变更、生成报告、触发 gc-scan |
+| SessionStart | 新对话开始 | 注入 git 状态、Loop 状态、历史审查 |
+| GC Agent | 定时/手动 | 运行 gc-scan.mjs，健康检查 8 个维度 |
 
 ---
 
@@ -148,22 +151,27 @@ your-project/
 ├── .lsp.json                   LSP 配置
 ├── package.json                npm 分发
 ├── scripts/
-│   ├── check.mjs               健康检查
+│   ├── check.mjs               安装健康检查
+│   ├── gc-scan.mjs             GC 扫描（8 个维度）
 │   ├── init.mjs                一键安装
 │   └── upgrade.mjs             升级同步
 │
 ├── .claude/
 │   ├── settings.json           Hook 注册
-│   ├── .harness-state          状态感知
+│   ├── .harness-state          阶段/模式感知
+│   ├── loops/
+│   │   ├── STATE.md            Loop 状态快照（hot）
+│   │   └── LOG.md              扫描历史记录（warm）
 │   ├── skills/
+│   │   ├── harness-gc/         GC Agent 技能
 │   │   ├── harness-init/       AI 安装向导
 │   │   └── harness-mode/       工作流模式
 │   └── hooks/
 │       ├── pre-tool-check.mjs  安全拦截
 │       ├── post-tool-check.mjs 自动格式化
 │       ├── session-context.mjs 上下文注入
-│       ├── session-review.mjs  变更审查
-│       └── pre-compact.mjs     长会话保护
+│       ├── session-review.mjs  变更审查 + GC 集成
+│       └── pre-compact.mjs     Loop 状态保持
 │
 ├── .github/
 │   └── workflows/

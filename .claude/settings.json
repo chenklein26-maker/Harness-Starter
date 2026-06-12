@@ -6,13 +6,12 @@
         "command": "node .claude/hooks/pre-tool-check.mjs"
       }
     ],
-    // PostToolUse — 取消注释即可启用自动格式化
-    // "PostToolUse": [
-    //   {
-    //     "type": "command",
-    //     "command": "node .claude/hooks/post-tool-check.mjs"
-    //   }
-    // ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "node .claude/hooks/post-tool-check.mjs"
+      }
+    ],
     "PreCompact": [
       {
         "type": "command",

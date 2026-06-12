@@ -129,19 +129,17 @@ description: Initialize this project with the Harness Engineering starter templa
 
 ## Step 4: 检查 Hook 文件
 
-检查 `.claude/hooks/` 下四个文件是否存在：
+检查 `.claude/hooks/` 下五个文件是否存在：
 - `pre-tool-check.mjs` — 防止 AI 修改 .env
-- `session-context.mjs` — 自动注入 git 状态
-- `session-review.mjs` — 对话结束生成审查报告
-- `post-tool-check.mjs` — 自动格式化（可选，L3 升级）
+- `post-tool-check.mjs` — 自动格式化
+- `pre-compact.mjs` — 长会话保留 Loop 状态
+- `session-context.mjs` — 自动注入 git 状态 + Loop 状态
+- `session-review.mjs` — 对话结束生成审查报告 + GC 扫描
 
 缺失则从模板复制。已有则跳过，不要覆盖。
 
-检查 `.claude/settings.json` 中是否注册了核心 Hook（PreToolUse / SessionStart / Stop / PreCompact）。
+检查 `.claude/settings.json` 中是否注册了所有 Hook（PreToolUse / PostToolUse / PreCompact / SessionStart / Stop）。
 缺失则补充，已有的其他配置不要删除。
-
-询问用户是否需要启用 PostToolUse Hook（自动格式化）。
-如果用户确认：在 settings.json 中取消 PostToolUse 相关行的注释。
 
 ## Step 5: 检查并安装 LSP
 
@@ -162,6 +160,11 @@ description: Initialize this project with the Harness Engineering starter templa
 
 执行 `node scripts/check.mjs`，向用户展示结果。
 如果有失败项，逐一处理。
+
+可选：向用户介绍 GC Agent：
+- `node scripts/gc-scan.mjs` — 手动执行 8 维度健康扫描
+- `/loop 24h "node scripts/gc-scan.mjs"` — 定时自动扫描
+- 扫描结果持久化在 `.claude/loops/LOG.md`
 
 ## Step 8: 完成提示
 

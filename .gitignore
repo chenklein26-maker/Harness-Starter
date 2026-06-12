@@ -1,5 +1,6 @@
 node_modules/
 .claude/reviews/
+.claude/loops/
 .claude/.upgrade-backups/
 .claude/.upgrade-tmp/
 .DS_Store

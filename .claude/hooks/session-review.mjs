@@ -115,6 +115,23 @@ if (hasUncommitted) flags.push("ℹ️ 有未提交的变更，建议及时提�
 if (!isTweak && depWithoutLock) flags.push("⚠️ 依赖文件已修改但未更新 lock 文件");
 if (isFix && allChanged.length > 5) flags.push("⚠️ 修复模式下变更范围偏大，确认是否超出修复目标");
 
+// GC 扫描结果集成
+const gcScanScript = join(projectRoot, "scripts/gc-scan.mjs");
+if (existsSync(gcScanScript)) {
+  try {
+    const gcOutput = execSync("node " + gcScanScript + " --json", {
+      cwd: projectRoot, encoding: "utf-8", timeout: 10000, stdio: ["pipe", "pipe", "pipe"]
+    }).trim();
+    const gcResult = JSON.parse(gcOutput);
+    let gcFlags = [];
+    for (const f of gcResult.findings || []) {
+      if (f.severity === "critical") gcFlags.push("[GC] " + f.message);
+      else if (f.severity === "warning") gcFlags.push("[GC] " + f.message);
+    }
+    if (gcFlags.length > 0) flags.push("---", "GC Scan (" + gcResult.summary.total + " 项发现):", ...gcFlags);
+  } catch { /* gc-scan 失败不阻塞审查 */ }
+}
+
 const report = [
   "## Stop Hook 审查报告",
   `时间: ${new Date().toLocaleString("zh-CN")}`,

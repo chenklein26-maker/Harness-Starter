@@ -48,8 +48,36 @@
 
 - SessionStart 自动注入 git 状态
 - PreToolUse 自动拦截危险操作
+- PostToolUse 自动格式化代码
+- PreCompact 保存 Loop 状态（长会话保护）
 - Stop 自动生成审查报告至 .claude/reviews/（按日期累积）
 - 下次 SessionStart 自动加载最近几次审查记录
+
+# Loop Engineering（自治循环）
+
+从 "人驱动 AI" 向 "系统驱动 AI" 演进。
+
+## GC Agent（垃圾回收 Agent）
+
+- **Skill**: `.claude/skills/harness-gc/SKILL.md`
+- **扫描脚本**: `scripts/gc-scan.mjs`（确定性，8 个维度）
+- **状态文件**: `.claude/loops/STATE.md`（hot，每次会话自动加载）
+- **历史记录**: `.claude/loops/LOG.md`（warm，按需读取）
+
+### 核心原则
+
+1. **外部验证门** — 扫描来自 `gc-scan.mjs`，非 AI 自我报告
+2. **执行与验证分离** — 写代码的 Agent 不给自己打分
+3. **Circuit Breaker** — 连续 3 次无改善则停止，等你介入
+4. **认知不投降** — 所有修复最终由你 review → 确认
+
+### 触发方式
+
+| 方式 | 命令 | 说明 |
+|------|------|------|
+| 手动 | `node scripts/gc-scan.mjs` | 立即执行一次健康检查 |
+| Loop | `/loop 24h "node scripts/gc-scan.mjs"` | 每 24 小时自动扫描 |
+| Routine | `/schedule daily GC scan at 2am` | 持久化定时（需 Max）|
 
 # 成熟度路线图
 
@@ -59,14 +87,20 @@
 |:---:|---|----|----|
 | L0 | 裸用 | 没有 CLAUDE.md | 一切 |
 | L1 | 规则层 | 有 CLAUDE.md + 行为准则 | hooks、自动化 |
-| **L2** | **反馈回路** | **PreToolUse + SessionStart + Stop 已激活** | **← 初始化完成后在此** |
-| **L3** | **自动修正** | **加上 PostToolUse 后自动格式化** | **取消 settings.json 中 PostToolUse 注释即可** |
-| L4 | 自治系统 | Agent 定期扫描代码/文档一致性，自动发起修复 PR | 垃圾回收 Agent、定时任务 |
+| L2 | 反馈回路 | PreToolUse + SessionStart + Stop 已激活 | 自动格式化 |
+| **L3** | **自动修正** | **PostToolUse + PreCompact + 增强审查已激活** | **← 本模板当前在此** |
+| **L4** | **自治系统** | **GC Agent 定期扫描 + Loop 状态持久化** | **GC 已内置，需用户激活使用** |
 
 # 扩展方向
 
 以下内容不包含在 Starter 里，按需自行添加：
 
-**PostToolUse 自动格式化** — hook 文件已预设（.claude/hooks/post-tool-check.mjs），在 settings.json 中取消 PostToolUse 的注释即可启用。检测项目中的 prettier / biome 等工具，每次编辑后自动格式化。无对应工具时静默跳过。
+**PostToolUse 自动格式化** — 已激活。检测项目中的 prettier / biome 等工具，每次编辑后自动格式化。无对应工具时静默跳过。
 
-**垃圾回收 Agent**（L4 方向）— OpenAI 团队的做法：设一个定期运行的 Agent，扫描代码与文档的一致性（比如 README 的 API 示例是否还能跑通），发现不一致就自动创建修复 PR。可以用 MCP + 定时任务实现。比泛泛的"记录缺陷率"更具体、更可操作。
+**PreCompact Hook** — 已激活。在上下文压缩前保存 Loop 状态 + 当前任务进度。
+
+**GC Agent（垃圾回收）** — 已内置。`scripts/gc-scan.mjs` + `harness-gc` Skill。使用方式：`node scripts/gc-scan.mjs` 或 `/loop 24h "node scripts/gc-scan.mjs"`
+
+**Claude Code Routines** — 可将 GC Agent 部署为 Anthropic 服务端持久任务（需 Max）。`/schedule daily GC scan at 2am`
+
+**Worktree 隔离** — 并行 Agent 场景下用 `EnterWorktree` 隔离文件变更，防止冲突。
