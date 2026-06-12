@@ -70,7 +70,7 @@ cp -r .claude/ CLAUDE.md .lsp.json /path/to/your-project/
 
 ## 整体架构
 
-一条对话的生命周期中，Hook 按以下顺序自动触发，GC Agent 独立运行：
+一条对话的生命周期中，Hook 按以下顺序自动触发：
 
 ```mermaid
 flowchart LR
@@ -80,18 +80,17 @@ flowchart LR
   D --> E[Stop]
   E --> F[SessionStart<br/>下次对话]
   G[PreCompact] -.->|压缩前| D
-  H[GC Agent<br/>/loop / Routine] -.->|独立定时| I[gc-scan.mjs]
-  I -.->|写 LOG.md| F
 ```
 
-| Hook / Agent | 时机 | 职责 |
+| Hook | 时机 | 职责 |
 |------|------|------|
 | PreToolUse | 工具执行前 | 安全拦截：.env 保护、危险命令 |
 | PostToolUse | 编辑完成后 | 自动格式化代码 |
-| PreCompact | 上下文压缩前 | 保存 Loop 状态 + 当前进度 |
-| Stop | 每次响应后 | 审查变更、生成报告、触发 gc-scan |
-| SessionStart | 新对话开始 | 注入 git 状态、Loop 状态、历史审查 |
-| GC Agent | 定时/手动 | 运行 gc-scan.mjs，健康检查 8 个维度 |
+| PreCompact | 上下文压缩前 | 保存会话关键状态 |
+| Stop | 每次响应后 | 审查变更、生成报告 |
+| SessionStart | 新对话开始 | 注入 git 状态、历史审查 |
+
+> 🔧 **进阶：GC Agent（L4 自治）** — 内置 `scripts/gc-scan.mjs` + `harness-gc` Skill，定时扫描项目健康状态。详见 `CLAUDE.md` 的 Loop Engineering 章节。新手可忽略。
 
 ---
 
@@ -152,26 +151,21 @@ your-project/
 ├── package.json                npm 分发
 ├── scripts/
 │   ├── check.mjs               安装健康检查
-│   ├── gc-scan.mjs             GC 扫描（8 个维度）
 │   ├── init.mjs                一键安装
 │   └── upgrade.mjs             升级同步
 │
 ├── .claude/
 │   ├── settings.json           Hook 注册
 │   ├── .harness-state          阶段/模式感知
-│   ├── loops/
-│   │   ├── STATE.md            Loop 状态快照（hot）
-│   │   └── LOG.md              扫描历史记录（warm）
 │   ├── skills/
-│   │   ├── harness-gc/         GC Agent 技能
 │   │   ├── harness-init/       AI 安装向导
 │   │   └── harness-mode/       工作流模式
 │   └── hooks/
 │       ├── pre-tool-check.mjs  安全拦截
 │       ├── post-tool-check.mjs 自动格式化
 │       ├── session-context.mjs 上下文注入
-│       ├── session-review.mjs  变更审查 + GC 集成
-│       └── pre-compact.mjs     Loop 状态保持
+│       ├── session-review.mjs  变更审查
+│       └── pre-compact.mjs     长会话保护
 │
 ├── .github/
 │   └── workflows/
@@ -226,6 +220,16 @@ Harness 支持三种工作模式，自动调整审查严格度：
 - 在审查报告中增加正确性评分
 - 记录每次改动的缺陷率
 - 建立质量基线，低于阈值时告警
+
+### 自治扫描（GC Agent）
+
+> 进阶功能，新手可跳过。
+
+Harness Starter 内置了 GC（Garbage Collection）Agent，用于定期扫描项目健康状态。
+- 扫描脚本：`scripts/gc-scan.mjs`（纯 Node.js，8 个维度）
+- 触发方式：`node scripts/gc-scan.mjs` 或 `/loop 24h "node scripts/gc-scan.mjs"`
+- 数据持久化：`.claude/loops/STATE.md` + `LOG.md`
+- 完整说明见 `.claude/skills/harness-gc/SKILL.md`
 
 ### 多 Agent 团队
 

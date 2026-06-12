@@ -55,6 +55,8 @@
 
 # Loop Engineering（自治循环）
 
+> ⚡ **进阶特性（L4）**：新手可以先熟悉前三个 Hook，后续再了解这部分。
+
 从 "人驱动 AI" 向 "系统驱动 AI" 演进。
 
 ## GC Agent（垃圾回收 Agent）
@@ -89,7 +91,7 @@
 | L1 | 规则层 | 有 CLAUDE.md + 行为准则 | hooks、自动化 |
 | L2 | 反馈回路 | PreToolUse + SessionStart + Stop 已激活 | 自动格式化 |
 | **L3** | **自动修正** | **PostToolUse + PreCompact + 增强审查已激活** | **← 本模板当前在此** |
-| **L4** | **自治系统** | **GC Agent 定期扫描 + Loop 状态持久化** | **GC 已内置，需用户激活使用** |
+| **L4** | **自治系统 🔧** | **GC Agent 定期扫描 + Loop 状态持久化** | **进阶特性，新手可先专注于 L3** |
 
 # 扩展方向
 
@@ -97,10 +99,8 @@
 
 **PostToolUse 自动格式化** — 已激活。检测项目中的 prettier / biome 等工具，每次编辑后自动格式化。无对应工具时静默跳过。
 
-**PreCompact Hook** — 已激活。在上下文压缩前保存 Loop 状态 + 当前任务进度。
+**PreCompact Hook** — 已激活。在上下文压缩前保存会话关键状态 + 当前任务进度。
 
-**GC Agent（垃圾回收）** — 已内置。`scripts/gc-scan.mjs` + `harness-gc` Skill。使用方式：`node scripts/gc-scan.mjs` 或 `/loop 24h "node scripts/gc-scan.mjs"`
+**GC Agent（垃圾回收，进阶）** — 已内置但非必须。`scripts/gc-scan.mjs` + `harness-gc` Skill。使用方式：`node scripts/gc-scan.mjs` 或 `/loop 24h "node scripts/gc-scan.mjs"`
 
 **Claude Code Routines** — 可将 GC Agent 部署为 Anthropic 服务端持久任务（需 Max）。`/schedule daily GC scan at 2am`
-
-**Worktree 隔离** — 并行 Agent 场景下用 `EnterWorktree` 隔离文件变更，防止冲突。
