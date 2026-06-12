@@ -1,6 +1,6 @@
 # 项目概要
 
-> TODO: 首次使用请运行 `harness-init` Skill 完成初始化
+> 🚀 首次使用请说 `开始` 或 `初始化` — AI 会自动走完 `harness-start` 三步流程（初始化 → 看架构 → 删多余）
 
 用途：【待填写：项目用途】
 技术栈：【待填写：例如 Next.js 15 + tRPC + PostgreSQL + Codegraph】
