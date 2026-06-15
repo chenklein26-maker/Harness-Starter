@@ -1,6 +1,6 @@
 # 项目概要
 
-> 🚀 首次使用请说 `开始` 或 `初始化` — AI 会自动走完 `harness-start` 三步流程（初始化 → 看架构 → 删多余）
+> 🚀 首次使用请说 `开始` 或 `初始化` — AI 会自动走完 `harness-start` 四步流程（初始化 → 看架构 → 删多余 → 目录体检）
 
 用途：【待填写：项目用途】
 技术栈：【待填写：例如 Next.js 15 + tRPC + PostgreSQL + Codegraph】
@@ -38,6 +38,38 @@
 ## Goal-Driven Execution
 - 每个任务转成可验证的目标
 - 多步骤任务先列计划再动手
+
+### 目标定义规则（硬性）
+
+在执行多步骤任务前，必须先明确定义完成条件。完成条件必须满足以下要求：
+
+1. **可被机器验证**
+   - ✅ "test/auth 下所有测试通过，tsc --noEmit 零报错，lint 零违规"
+   - ❌ "帮我把这个功能做好"
+
+2. **含边界条件**
+   - ✅ "测试全过，且不得删除或修改已有测试用例"
+   - ❌ "测试全过"（Agent 可能删测试来"通过"）
+
+3. **有失败降级方案**
+   - ✅ "连续 3 次验证未通过 → 停止并汇报，而非无限重试"
+   - ❌ "直到做完为止"（没有停止条件的 loop 是烧钱机器）
+
+4. **目标分层**
+   - 长期目标：这周完成用户认证模块
+   - 本轮目标：修通 auth 目录下的 3 个失败测试
+
+完成条件输出格式参考：
+
+```
+目标：修复 API 鉴权失败问题
+完成条件：
+  ✅ test/auth/*.test.ts 全部通过（npm test auth）
+  ✅ tsc --noEmit 零报错
+  ✅ 不修改现有测试用例
+边界：不得删除或禁用已有测试
+降级：3 轮尝试未通过则停止并列出失败项
+```
 
 # 全局约定
 
@@ -94,6 +126,7 @@
 | L2 | 反馈回路 | PreToolUse + SessionStart + Stop 已激活 + 审查报告 ≥3 份 | — |
 | **L3** | **自动修正** | **PostToolUse + PreCompact 已激活 + 审查报告 ≥5 份 + 0 调试残留** | **← 本模板当前在此** |
 | **L4** | **自治系统 🔧** | **gc-scan 连续 3 次运行 0 critical + Loop 状态持续更新** | **进阶特性（满足 L3 后再探索）** |
+| **L5** | **循环工程 🔄** | **外循环自动调度 + Maker/Checker 分离 + 跨会话状态持久化 + 目标定义硬规则** | **已内置组件，需自行组装 loop** |
 
 # 扩展方向
 
@@ -106,3 +139,7 @@
 **GC Agent（垃圾回收，进阶）** — 已内置但非必须。`scripts/gc-scan.mjs` + `harness-gc` Skill。使用方式：`node scripts/gc-scan.mjs` 或 `/loop 24h "node scripts/gc-scan.mjs"`
 
 **Claude Code Routines** — 可将 GC Agent 部署为 Anthropic 服务端持久任务（需 Max）。`/schedule daily GC scan at 2am`
+
+**Worktree 隔离** — 并行 Agent 场景下用 `EnterWorktree` 隔离文件变更。每个 Agent 拥有独立的工作目录和分支，互不干扰。详见 [Addy Osmani: Loop Engineering](https://addyosmani.com/blog/loop-engineering/)。
+
+**Loop 场景模板** — `.claude/references/loop-templates.md` 提供了三种开箱即用的外循环模板：每日健康巡检、PR 自动 babysit、自我进化循环。参考这些模板组装你自己的自动化流水线。
