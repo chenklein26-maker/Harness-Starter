@@ -8,6 +8,7 @@ Works with both new and existing projects
 <p>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
   <img src="https://img.shields.io/badge/Claude_Code-2.1%2B-blue" alt="Claude Code 2.1+">
+  <img src="https://img.shields.io/badge/tests-54%20passing-brightgreen" alt="54 tests passing">
 </p>
 
 > Other platforms (Cursor, Codex, Gemini, etc.): just tell your AI "adapt this template to my environment"
@@ -51,6 +52,7 @@ The AI will:
 ```bash
 npx harness-starter              # Install to current dir
 npx harness-starter /path/to/proj  # Install to target dir
+npx harness-starter --force      # Override existing files
 ```
 
 Then tell Claude Code `initialize Harness` to complete setup.
@@ -84,21 +86,76 @@ During a conversation lifecycle, hooks fire automatically in this order:
 
 ```mermaid
 flowchart LR
-  A[PreToolUse] --> B[Tool Call]
-  C[PostToolUse] --> B
-  B --> D[Response]
-  D --> E[Stop]
-  E --> F[SessionStart<br/>next session]
-  G[PreCompact] -.->|before compaction| D
+  A[SessionStart] --> B[PreToolUse]
+  B --> C[Tool Call]
+  D[PostToolUse] -.-> C
+  C --> E[Response]
+  E --> F[Stop]
+  G[PreCompact] -.->|before compaction| E
 ```
 
-| Hook | Timing | Purpose |
-|------|--------|---------|
-| PreToolUse | Before tool execution | Safety: .env protection, dangerous commands |
-| PostToolUse | After edits | Auto-format code |
-| PreCompact | Before context compaction | Preserve session state |
-| Stop | After each response | Audit changes, generate review |
-| SessionStart | New session begins | Inject git status, review history |
+| Hook | Timing | Purpose | Note |
+|------|--------|---------|------|
+| SessionStart | New session begins | Inject git status, review history | Loads last 5 reviews |
+| PreToolUse | Before tool execution | Safety: .env, dangerous commands | Relaxed in tweak/design mode |
+| PostToolUse | After edits | Auto-format code | Check-then-write; skips if already formatted |
+| PreCompact | Before context compaction | Preserve session state | Prevents progress loss in long sessions |
+| Stop | After each response | Audit changes, generate report | Auto-integrates GC scan results |
+
+> All hooks share a common data layer (`.claude/hooks/lib/harness-context.mjs`),
+> eliminating duplicate logic and keeping data reads consistent.
+
+---
+
+## Project Structure
+
+```
+your-project/
+├── CLAUDE.md                   AI behavior rules (~60 lines, lean)
+├── .lsp.json                   LSP configuration
+├── package.json                npm distribution
+├── vitest.config.js            Test configuration
+├── tests/                      54 automated tests
+│   ├── gc-scan.test.mjs        GC scanner tests (22)
+│   ├── check.test.mjs          Health check tests
+│   ├── harness-context.test.mjs Shared lib tests
+│   ├── init.test.mjs           Installer tests
+│   └── upgrade.test.mjs        Upgrade script tests
+│
+├── scripts/
+│   ├── check.mjs               Health check
+│   ├── init.mjs                One-click install (writes version tag)
+│   ├── gc-scan.mjs             8-dimension GC scanner
+│   └── upgrade.mjs             Smart upgrade (supports --dry-run)
+│
+├── .claude/
+│   ├── settings.json           Hook registration
+│   ├── .harness-state          State awareness
+│   ├── .harness-version        Template version tag
+│   ├── hooks/
+│   │   ├── pre-tool-check.mjs  Safety (+ optional OpenSpec check)
+│   │   ├── post-tool-check.mjs Auto-formatter (check-then-write)
+│   │   ├── session-context.mjs Context injection
+│   │   ├── session-review.mjs  Change review
+│   │   ├── pre-compact.mjs     Long-session guard
+│   │   └── lib/
+│   │       └── harness-context.mjs  Shared data layer
+│   ├── skills/
+│   │   ├── harness-init/       AI setup workflow
+│   │   ├── harness-mode/       Workflow modes
+│   │   ├── harness-gc/         GC Agent
+│   │   ├── tech-review/        Technical decision review
+│   │   └── verify-goal/        Goal verification
+│   └── references/
+│       ├── maturity-roadmap.md     L0-L5 maturity
+│       ├── extension-catalog.md    Extension directory
+│       ├── goal-definition-guide.md Goal definition guide
+│       └── loop-templates.md       Loop automation templates
+│
+├── .github/
+│   └── workflows/
+│       └── harness-check.yml   CI check + tests
+```
 
 ---
 
@@ -145,91 +202,76 @@ cd /path/to/your-project && node scripts/check.mjs
 # 5. Tell Claude Code: initialize Harness
 ```
 
----
+## Maturity Roadmap
 
-## Project Structure
+| Level | Name | Description |
+|:---:|---|------|
+| L0 | Bare | No template, manual prompting |
+| L1 | Rules | CLAUDE.md + behavior guidelines |
+| L2 | Feedback | PreToolUse + SessionStart + Stop |
+| **L3** | **Auto-Correction** | **PostToolUse + PreCompact + ≥5 reviews ← Out of the box** |
+| L4 | Autonomous 🔧 | gc-scan 0 critical × 3 + Loop updates (built-in) |
+| L5 | Loop Engineering 🔄 | External scheduling + Maker/Checker separation (built-in) |
 
-```
-your-project/
-├── CLAUDE.md                   AI behavior rules
-├── .lsp.json                   LSP configuration
-├── package.json                npm distribution
-├── scripts/
-│   ├── check.mjs               Health check
-│   ├── init.mjs                One-click install
-│   └── upgrade.mjs             Upgrade sync
-│
-├── .claude/
-│   ├── settings.json           Hook registration
-│   ├── .harness-state          State awareness
-│   ├── skills/
-│   │   ├── harness-init/       AI setup workflow
-│   │   └── harness-mode/       Workflow modes
-│   └── hooks/
-│       ├── pre-tool-check.mjs  Safety interceptor
-│       ├── post-tool-check.mjs Auto formatter
-│       ├── session-context.mjs Context injection
-│       ├── session-review.mjs  Change review
-│       └── pre-compact.mjs     Long-session guard
-│
-├── .github/
-│   └── workflows/
-│       └── harness-check.yml   CI check
-```
-
----
-
-## Customization
-
-### Language Support
-
-`.lsp.json` defaults to TypeScript. For other languages:
-
-```json
-// Python
-{ "python": { "command": "pyright-langserver", "args": ["--stdio"], "extensionToLanguage": { ".py": "python" } } }
-
-// Go
-{ "go": { "command": "gopls", "args": [], "extensionToLanguage": { ".go": "go" } } }
-```
+> Details → `.claude/references/maturity-roadmap.md`
 
 ---
 
 ## Extensions
 
-The following features are disabled by default. Enable them as needed.
-
 ### Workflow Modes
 
-Harness supports three modes that auto-tune review strictness:
+Three modes that auto-tune review strictness:
 
-| Mode | Effect |
-|------|--------|
+| Command | Effect |
+|---------|--------|
 | `/harness-mode full` | Full checks, all rules active |
-| `/harness-mode hotfix` | Emergency fix, skip line/file count checks |
+| `/harness-mode hotfix` | Emergency fix, skip line/file count |
 | `/harness-mode tweak` | Minimal, .env protection only |
-
-Three phases also affect behavior:
-
-| Phase | Effect |
-|------|--------|
-| `/harness-phase design` | Relaxed review, skip debug residue checks |
-| `/harness-phase build` | Normal review |
+| `/harness-phase design` | Relaxed, skip debug residue |
 | `/harness-phase fix` | Tightened, warn if >5 files changed |
 
-State is stored in `.claude/.harness-state` and injected at SessionStart. See `.claude/skills/harness-mode/SKILL.md`.
+Stored in `.claude/.harness-state`, injected at SessionStart.
 
-### Quality Evaluation (Eval)
+### GC Autonomous Scanning
 
-Connect Stop Hook review results to automated evaluation to track AI output quality:
-- Add correctness scores to review reports
-- Track defect rate per change
-- Set a quality baseline and alert when it drops
+```bash
+# Manual scan
+node scripts/gc-scan.mjs
+
+# Scheduled loop (24h interval)
+/loop 24h "node scripts/gc-scan.mjs"
+
+# Preview upgrades
+node scripts/upgrade.mjs --dry-run
+```
+
+8 deterministic dimensions: CLAUDE.md completeness, Git status, TODO/FIXME density, .gitignore health, Hook registration, Harness state, TypeScript errors, LSP config. See `.claude/skills/harness-gc/SKILL.md`.
+
+### Template Upgrade
+
+```bash
+# Check and upgrade
+node scripts/upgrade.mjs
+
+# Preview only
+node scripts/upgrade.mjs --dry-run
+```
+
+Version tracking (`.claude/.harness-version`), smart classification of "user-modified" vs "template-original" files.
+
+### Environment Variables
+
+| Variable | Effect |
+|----------|--------|
+| `HARNESS_POSTTOOL_FORMAT=0` | Disable auto-formatting |
+| `HARNESS_POSTTOOL_FORMAT_SKIP_PATTERNS=*.md,*.json` | Skip file types |
+| `HARNESS_OPENSPEC_CHECK=1` | Enable OpenSpec awareness |
 
 ### Multi-Agent Teams
 
 Split complex tasks across multiple agents for parallel work:
-- Explore multiple approaches simultaneously and compare results
+- Explore multiple approaches simultaneously
 - Separate frontend/backend/testing into parallel streams
 - Isolate long-running tasks from the main conversation
 
