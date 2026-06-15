@@ -9,7 +9,7 @@
  *   node scripts/init.mjs                  # 本地运行
  */
 
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync } from "fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { join, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -70,6 +70,17 @@ for (const { src, dest, dir, optional } of FILES) {
 }
 
 console.log(`\n📊 结果: ${installed} 已安装, ${skipped} 已跳过\n`);
+
+// 写入版本跟踪文件
+const versionPath = join(target, ".claude", ".harness-version");
+const versionDir = join(target, ".claude");
+if (!existsSync(versionDir)) mkdirSync(versionDir, { recursive: true });
+const pkg = JSON.parse(readFileSync(join(templateRoot, "package.json"), "utf-8"));
+writeFileSync(versionPath, JSON.stringify({
+  version: pkg.version || "1.0.0",
+  installed: new Date().toISOString(),
+}, null, 2) + "\n", "utf-8");
+console.log("✅ 已写入版本标记: .claude/.harness-version\n");
 
 console.log("💡 下一步:");
 console.log(`   1. cd ${target === process.cwd() ? "." : target}`);

@@ -22,21 +22,23 @@ description: Garbage Collection Agent — 定期扫描项目健康状态，检�
 
 ## 扫描维度
 
-| 维度 | 检查项 | 严重性 |
-|------|--------|--------|
-| CLAUDE.md 完整性 | 必要章节 + 占位符 | warning |
-| TODO/FIXME 密度 | 单文件 >5 处 | info |
-| .gitignore 健康 | node_modules/reviews/loops 遗漏 | info |
-| Hook 注册 | 文件存在但未注册/被注释 | warning |
-| TypeScript 类型 | tsc --noEmit 错误 | warning |
-| LSP 配置 | .lsp.json 有效性 | info |
-| 调试残留 | console.log/debugger 未清除 | warning |
-| Harness 状态 | .harness-state 有效性 | info |
+| # | 维度 | 检查项 | 严重性 |
+|---|------|--------|--------|
+| 1 | CLAUDE.md 完整性 | 必要章节 + 占位符 | critical / warning |
+| 2 | Git 状态 | 未提交变更数 + 调试残留 (console.log/debugger) | info / warning |
+| 3 | TODO/FIXME 密度 | 单文件 >5 处 | info |
+| 4 | .gitignore 健康 | node_modules/reviews/loops 遗漏 | info |
+| 5 | Hook 注册 | 文件存在但未注册/被注释 | critical / warning |
+| 6 | Harness 状态 | .harness-state 有效性 | info / warning |
+| 7 | TypeScript 类型 | tsc --noEmit 错误（如存在 tsconfig.json）| warning |
+| 8 | LSP 配置 | .lsp.json 有效性 | info / warning |
+
+> 维度清单以此表为准。代码中 `gc-scan.mjs` 的 JSDoc 为权威来源。
 
 ## 工作流
 
 ```
-TRIGGER → SCAN (gc-scan.msi) → ANALYZE → PROPOSE (可选) → WAIT (你 review)
+TRIGGER → SCAN (gc-scan.mjs) → ANALYZE → PROPOSE (可选) → WAIT (你 review)
 ```
 
 ## 状态管理

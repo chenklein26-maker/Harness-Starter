@@ -3,10 +3,23 @@
   "version": "1.0.0",
   "description": "Claude Code Harness Engineering starter template",
   "license": "MIT",
-  "keywords": ["claude-code", "harness", "hooks", "starter", "template"],
+  "keywords": [
+    "claude-code",
+    "harness",
+    "hooks",
+    "starter",
+    "template"
+  ],
   "repository": "chenklein26-maker/Harness-Starter",
+  "type": "module",
   "bin": {
     "harness-init": "./scripts/init.mjs"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
   },
   "files": [
     ".claude/",

@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, readdirSync } from "fs";
 import { join, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -61,6 +61,20 @@ if (!isTweak && !isDesign) {
         reason: `⚠️ 安全拦截：${matched.label} 被禁用\n   → 替代方案：${matched.alt}\n   → 如需强制执行，请在终端手动输入命令\n   → 当前模式=${harnessState.mode}，切换为 tweak 模式可放行`,
       }));
       process.exit(0);
+    }
+// OpenSpec 感知检查（可选，由 HARNESS_OPENSPEC_CHECK=1 开启）
+if (process.env.HARNESS_OPENSPEC_CHECK === "1" && (tool === "Write" || tool === "Edit")) {
+  const openspecDir = join(projectRoot, "openspec");
+  if (existsSync(openspecDir)) {
+    const changesDir = join(openspecDir, "changes");
+    const hasChanges = existsSync(changesDir) &&
+      readdirSync(changesDir).filter(f =>
+        f !== "archive" && !f.startsWith(".")
+      ).length > 0;
+    if (!hasChanges) {
+      process.stderr.write(
+        "[PreToolUse] ⚠️ 项目已安装 OpenSpec 但无活跃提案。架构变更请先运行 openspec propose。\n"
+      );
     }
   }
 }
