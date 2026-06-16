@@ -26,8 +26,6 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ## ✨ 最近更新：Loop Engineering 全面升级
 
-> 截图到抖音 / 小红书，一眼看出 Harness Starter 在做什么
-
 本版本引入了**完整的 Loop 自治循环系统**，从"人驱动 AI"迈向"系统驱动 AI"：
 
 | 特性 | 说明 |
