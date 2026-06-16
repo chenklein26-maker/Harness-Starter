@@ -23,6 +23,33 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ---
 
+## ✨ What's New: Loop Engineering
+
+This release introduces a **complete Loop automation system** — evolving from "human-driven AI" to "system-driven AI":
+
+| Feature | Description |
+|---------|-------------|
+| 🔁 **GC Autonomous Scan** | `node scripts/gc-scan.mjs` — 8 deterministic dimensions, no AI self-reporting |
+| ⏱ **Scheduled Loops** | `/loop 24h "node scripts/gc-scan.mjs"` — zero-touch operation |
+| 🛑 **Circuit Breaker** | 3 consecutive no-improvement runs → auto-pause, waits for human |
+| ✅ **Maker/Checker Separation** | The coding agent doesn't grade its own work; `verify-goal` validates independently |
+| 📊 **State Persistence** | `STATE.md` (hot, auto-loaded) + `LOG.md` (cold, on-demand) |
+| 🧩 **3 Loop Templates** | Daily health check, PR babysit, self-evolution — ready to use |
+| 📋 **Audit Trail** | Every Stop triggers a review report, accumulated by date in `.claude/reviews/` |
+
+```mermaid
+flowchart LR
+  A[GC Agent] -->|8-dim scan| B[Analyze]
+  B -->|issues found?| C{Circuit Breaker}
+  C -->|3x no improvement| D[⏸ Pause for human]
+  C -->|improvement| E[Fix]
+  E --> A
+```
+
+> Full docs → `.claude/skills/harness-gc/SKILL.md` · Loop templates → `.claude/references/loop-templates.md` · Maturity roadmap → `.claude/references/maturity-roadmap.md`
+
+---
+
 ## Design
 
 Every new project requires repeating the same rules to the AI: tech stack, test commands, files to avoid.

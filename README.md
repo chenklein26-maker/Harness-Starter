@@ -24,6 +24,35 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ---
 
+## ✨ 最近更新：Loop Engineering 全面升级
+
+> 截图到抖音 / 小红书，一眼看出 Harness Starter 在做什么
+
+本版本引入了**完整的 Loop 自治循环系统**，从"人驱动 AI"迈向"系统驱动 AI"：
+
+| 特性 | 说明 |
+|------|------|
+| 🔁 **GC 自治扫描** | `node scripts/gc-scan.mjs` — 8 个维度确定性检查，不依赖 AI 自我报告 |
+| ⏱ **定时循环** | `/loop 24h "node scripts/gc-scan.mjs"` — 无需人工触发 |
+| 🛑 **Circuit Breaker** | 连续 3 次无改善 → 自动暂停，等你介入 |
+| ✅ **执行/验证分离** | 写代码的 Agent 不给自己打分，`verify-goal` 独立验证 |
+| 📊 **状态持久化** | `STATE.md`（热，会话自动加载）+ `LOG.md`（冷，按需读取）|
+| 🧩 **3 种 Loop 模板** | 每日巡检、PR babysit、自我进化 — 开箱即用 |
+| 📋 **审计闭环** | 每次 Stop 触发审查报告，按日期累积至 `.claude/reviews/` |
+
+```mermaid
+flowchart LR
+  A[GC Agent] -->|8 维扫描| B[分析]
+  B -->|有发现?| C{Circuit Breaker}
+  C -->|连续 3 次无改善| D[⏸ 暂停等人类]
+  C -->|有改进| E[修复]
+  E --> A
+```
+
+> 完整说明 → `.claude/skills/harness-gc/SKILL.md` · 循环模板 → `.claude/references/loop-templates.md` · 成熟度路线图 → `.claude/references/maturity-roadmap.md`
+
+---
+
 ## 设计思路
 
 每次新建项目或打开已有项目时，都需要反复告诉 AI 同样的规则：技术栈是什么、测试怎么跑、哪些文件不能动。
