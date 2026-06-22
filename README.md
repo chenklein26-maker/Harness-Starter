@@ -24,30 +24,31 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ---
 
-## ✨ 最近更新：Loop Engineering 全面升级
+## 📜 更新历程
 
-本版本引入了**完整的 Loop 自治循环系统**，从"人驱动 AI"迈向"系统驱动 AI"：
+### 2026-06 — 瘦身 + Ponytail 融合
 
-| 特性 | 说明 |
-|------|------|
-| 🔁 **GC 自治扫描** | `node scripts/gc-scan.mjs` — 8 个维度确定性检查，不依赖 AI 自我报告 |
-| ⏱ **定时循环** | `/loop 24h "node scripts/gc-scan.mjs"` — 无需人工触发 |
-| 🛑 **Circuit Breaker** | 连续 3 次无改善 → 自动暂停，等你介入 |
-| ✅ **执行/验证分离** | 写代码的 Agent 不给自己打分，`verify-goal` 独立验证 |
-| 📊 **状态持久化** | `STATE.md`（热，会话自动加载）+ `LOG.md`（冷，按需读取）|
-| 🧩 **3 种 Loop 模板** | 每日巡检、PR babysit、自我进化 — 开箱即用 |
-| 📋 **审计闭环** | 每次 Stop 触发审查报告，按日期累积至 `.claude/reviews/` |
+- **瘦身**：`npx harness-starter` 从全量安装改为 L2 核心（14 个文件），L3+ 可选按需追加
+- **Ponytail 6 级梯子**：Simplicity First 升级为 YAGNI → 标准库 → 平台原生 → 已有依赖 → 一行 → 最少代码
+- **自动格式化优化**：先 `--check` 再 `--write`，仅格式有问题时触发
+- **升级可控**：`node scripts/upgrade.mjs --dry-run` 预览变更
+- **54 个自动化测试**：覆盖 gc-scan、check、harness-context、init、upgrade
 
-```mermaid
-flowchart LR
-  A[GC Agent] -->|8 维扫描| B[分析]
-  B -->|有发现?| C{Circuit Breaker}
-  C -->|连续 3 次无改善| D[⏸ 暂停等人类]
-  C -->|有改进| E[修复]
-  E --> A
-```
+### 2026-06 — Loop Engineering 自治循环
 
-> 完整说明 → 见 GitHub 仓库 `.claude/skills/harness-gc/` · 循环模板 → 仓库 `.claude/references/loop-templates.md`
+- **GC 自治扫描**：`node scripts/gc-scan.mjs` — 8 维确定性检查，不依赖 AI 自我报告
+- **Circuit Breaker**：连续 3 次无改善 → 自动暂停，等你介入
+- **状态持久化**：STATE.md（热，会话自动加载）+ LOG.md（冷，按需读取）
+- **3 种 Loop 模板**：每日巡检、PR babysit、自我进化
+- **执行/验证分离**：写代码的 Agent 不给自己打分，`verify-goal` 独立验证
+
+### 2026-06 — 架构重构与测试体系
+
+- **5 钩子生命周期**：SessionStart → PreToolUse → PostToolUse → PreCompact → Stop
+- **共享工具库**：`harness-context.mjs` 消除 ~40 行钩子间重复逻辑
+- **CLAUDE.md 精简**：146 → 60 行，参考文档拆分到 `.claude/references/`
+- **版本跟踪**：`.claude/.harness-version` + `upgrade.mjs --dry-run`
+- **OpenSpec 条件化**：规则仅在 `openspec/` 目录存在时触发
 
 ---
 

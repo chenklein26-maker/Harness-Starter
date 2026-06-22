@@ -23,30 +23,31 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ---
 
-## ✨ What's New: Loop Engineering
+## 📜 Update History
 
-This release introduces a **complete Loop automation system** — evolving from "human-driven AI" to "system-driven AI":
+### 2026-06 — Slimming + Ponytail Integration
 
-| Feature | Description |
-|---------|-------------|
-| 🔁 **GC Autonomous Scan** | `node scripts/gc-scan.mjs` — 8 deterministic dimensions, no AI self-reporting |
-| ⏱ **Scheduled Loops** | `/loop 24h "node scripts/gc-scan.mjs"` — zero-touch operation |
-| 🛑 **Circuit Breaker** | 3 consecutive no-improvement runs → auto-pause, waits for human |
-| ✅ **Maker/Checker Separation** | The coding agent doesn't grade its own work; `verify-goal` validates independently |
-| 📊 **State Persistence** | `STATE.md` (hot, auto-loaded) + `LOG.md` (cold, on-demand) |
-| 🧩 **3 Loop Templates** | Daily health check, PR babysit, self-evolution — ready to use |
-| 📋 **Audit Trail** | Every Stop triggers a review report, accumulated by date in `.claude/reviews/` |
+- **Slim core**: `npx harness-starter` now installs L2 core only (14 files), L3+ added on demand
+- **6-rung ladder**: Simplicity First upgraded to YAGNI → stdlib → platform → existing deps → one line → minimum
+- **Format optimization**: Check-then-write; only formats when code has issues
+- **Controlled upgrades**: `node scripts/upgrade.mjs --dry-run` previews changes
+- **54 automated tests**: Covering gc-scan, check, harness-context, init, upgrade
 
-```mermaid
-flowchart LR
-  A[GC Agent] -->|8-dim scan| B[Analyze]
-  B -->|issues found?| C{Circuit Breaker}
-  C -->|3x no improvement| D[⏸ Pause for human]
-  C -->|improvement| E[Fix]
-  E --> A
-```
+### 2026-06 — Loop Engineering
 
-> Full docs → GitHub repo `.claude/skills/harness-gc/` · Loop templates → repo `.claude/references/loop-templates.md`
+- **GC Autonomous Scan**: `node scripts/gc-scan.mjs` — 8 deterministic dimensions
+- **Circuit Breaker**: 3× no improvement → auto-pause, waits for human
+- **State persistence**: STATE.md (hot, auto-loaded) + LOG.md (cold, on-demand)
+- **3 Loop templates**: Daily health check, PR babysit, self-evolution
+- **Maker/Checker separation**: Coding agent doesn't grade its own work
+
+### 2026-06 — Architecture Overhaul
+
+- **5-hook lifecycle**: SessionStart → PreToolUse → PostToolUse → PreCompact → Stop
+- **Shared utility lib**: `harness-context.mjs` eliminates ~40 lines of duplicate hook logic
+- **CLAUDE.md trimmed**: 146 → 60 lines, reference docs split to `.claude/references/`
+- **Version tracking**: `.claude/.harness-version` + `upgrade.mjs --dry-run`
+- **Conditional OpenSpec**: Rule only triggers when `openspec/` directory exists
 
 ---
 
