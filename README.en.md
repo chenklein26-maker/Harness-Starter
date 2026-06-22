@@ -25,29 +25,36 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ## 📜 Update History
 
-### 2026-06 — Slimming + Ponytail Integration
+### 2026-06-23 — Slimming + Ponytail
 
-- **Slim core**: `npx harness-starter` now installs L2 core only (14 files), L3+ added on demand
-- **6-rung ladder**: Simplicity First upgraded to YAGNI → stdlib → platform → existing deps → one line → minimum
-- **Format optimization**: Check-then-write; only formats when code has issues
-- **Controlled upgrades**: `node scripts/upgrade.mjs --dry-run` previews changes
-- **54 automated tests**: Covering gc-scan, check, harness-context, init, upgrade
+- **Slim core** — `npx` installs 14 L2 files only, L3+ on demand
+- **6-rung ladder** — YAGNI → stdlib → platform → existing deps → one line → minimum
+- **Format optimization** — Check-then-write, only touches broken files
+- **Controlled upgrades** — `node scripts/upgrade.mjs --dry-run`
+- **54 automated tests** — gc-scan, check, harness-context, init, upgrade
 
-### 2026-06 — Loop Engineering
+### 2026-06-15 — Major Refactor
 
-- **GC Autonomous Scan**: `node scripts/gc-scan.mjs` — 8 deterministic dimensions
-- **Circuit Breaker**: 3× no improvement → auto-pause, waits for human
-- **State persistence**: STATE.md (hot, auto-loaded) + LOG.md (cold, on-demand)
-- **3 Loop templates**: Daily health check, PR babysit, self-evolution
-- **Maker/Checker separation**: Coding agent doesn't grade its own work
+- **5-hook lifecycle** — SessionStart → PreToolUse → PostToolUse → PreCompact → Stop
+- **Shared utility lib** — `harness-context.mjs` eliminates ~40 lines of duplication
+- **CLAUDE.md trimmed** — 146 → 60 lines, references split to `.claude/references/`
+- **Version tracking** — `.claude/.harness-version` + `upgrade.mjs --dry-run`
+- **Conditional OpenSpec** — Only triggers when `openspec/` exists
 
-### 2026-06 — Architecture Overhaul
+### 2026-06-13 — Loop Engineering
 
-- **5-hook lifecycle**: SessionStart → PreToolUse → PostToolUse → PreCompact → Stop
-- **Shared utility lib**: `harness-context.mjs` eliminates ~40 lines of duplicate hook logic
-- **CLAUDE.md trimmed**: 146 → 60 lines, reference docs split to `.claude/references/`
-- **Version tracking**: `.claude/.harness-version` + `upgrade.mjs --dry-run`
-- **Conditional OpenSpec**: Rule only triggers when `openspec/` directory exists
+- **GC Autonomous Scan** — `node scripts/gc-scan.mjs`, 8 deterministic dimensions, no AI self-reporting
+- **Circuit Breaker** — 3× no improvement → auto-pause, waits for human
+- **State persistence** — STATE.md (hot) + LOG.md (cold), auto-loaded
+- **3 Loop templates** — Daily health check, PR babysit, self-evolution
+- **Maker/Checker separation** — Coding agent doesn't grade its own work
+
+### 2026-06-01 — Initial Setup
+
+- **4 core hooks** — PreToolUse + PostToolUse + SessionStart + Stop
+- **Karpathy principles** — 6 rules in CLAUDE.md
+- **Maturity roadmap** — L0→L5 tiered system
+- **Review reports** — Stop Hook auto-generates by date
 
 ---
 
