@@ -47,7 +47,7 @@ flowchart LR
   E --> A
 ```
 
-> 完整说明 → `.claude/skills/harness-gc/SKILL.md` · 循环模板 → `.claude/references/loop-templates.md` · 成熟度路线图 → `.claude/references/maturity-roadmap.md`
+> 完整说明 → 见 GitHub 仓库 `.claude/skills/harness-gc/` · 循环模板 → 仓库 `.claude/references/loop-templates.md`
 
 ---
 
@@ -168,22 +168,8 @@ your-project/
 │
 ├── .claude/references/        参考文档
 ├── tests/                      自动化测试（仅维护者）
+├── .github/workflows/          CI 检查 + 测试
 └── vitest.config.js
-│   ├── skills/
-│   │   ├── harness-init/       AI 安装向导
-│   │   ├── harness-mode/       工作流模式切换
-│   │   ├── harness-gc/         GC Agent 技能
-│   │   ├── tech-review/        技术方案审查
-│   │   └── verify-goal/        目标验证
-│   └── references/
-│       ├── maturity-roadmap.md     成熟度路线图（L0-L5）
-│       ├── extension-catalog.md    扩展功能目录
-│       ├── goal-definition-guide.md 目标定义详细示例
-│       └── loop-templates.md       外循环模板
-│
-├── .github/
-│   └── workflows/
-│       └── harness-check.yml   CI 检查 + 测试
 ```
 
 ---
@@ -242,12 +228,12 @@ cd /path/to/your-project && node scripts/check.mjs
 |:---:|---|------|
 | L0 | 裸用 | 无模板，手动提示 |
 | L1 | 规则层 | CLAUDE.md + 行为准则 |
-| L2 | 反馈回路 | PreToolUse + SessionStart + Stop 已激活 |
 | **L2** | **反馈回路** | **PreToolUse + SessionStart + Stop + 审查报告 ≥3 份 ← 开箱即用** |
-| L4 | 自治系统 🔧 | gc-scan 连续 3 次 0 critical + Loop 持续更新（组件已内置） |
+| L3 | 自动修正 🔧 | PostToolUse + PreCompact 自动格式化（需手动启用）|
+| L4 | 自治系统 🔧 | gc-scan 连续 3 次 0 critical + Loop 持续更新 |
 | L5 | 循环工程 🔄 | 外循环调度 + Maker/Checker 分离（组件已内置） |
 
-> 详细说明 → `.claude/references/maturity-roadmap.md`
+> 详细说明 → GitHub 仓库 `.claude/references/maturity-roadmap.md`
 
 ---
 
@@ -278,7 +264,7 @@ node scripts/gc-scan.mjs
 node scripts/upgrade.mjs --dry-run
 ```
 
-8 个确定性扫描维度：CLAUDE.md 完整性、Git 状态、TODO/FIXME 密度、.gitignore 健康、Hook 注册、Harness 状态、TypeScript 类型、LSP 配置。详见 `.claude/skills/harness-gc/SKILL.md`。
+8 个确定性扫描维度：CLAUDE.md 完整性、Git 状态、TODO/FIXME 密度、.gitignore 健康、Hook 注册、Harness 状态、TypeScript 类型、LSP 配置。详见 GitHub 仓库 `.claude/skills/harness-gc/SKILL.md`。
 
 ### 模板升级
 

@@ -46,7 +46,7 @@ flowchart LR
   E --> A
 ```
 
-> Full docs → `.claude/skills/harness-gc/SKILL.md` · Loop templates → `.claude/references/loop-templates.md` · Maturity roadmap → `.claude/references/maturity-roadmap.md`
+> Full docs → GitHub repo `.claude/skills/harness-gc/` · Loop templates → repo `.claude/references/loop-templates.md`
 
 ---
 
@@ -230,14 +230,16 @@ cd /path/to/your-project && node scripts/check.mjs
 
 | Level | Name | Description |
 |:---:|---|------|
+| Level | Name | Description |
+|:---:|---|------|
 | L0 | Bare | No template, manual prompting |
 | L1 | Rules | CLAUDE.md + behavior guidelines |
-| L2 | Feedback | PreToolUse + SessionStart + Stop |
-| **L3** | **Auto-Correction** | **PostToolUse + PreCompact + ≥5 reviews （manual enable）** |
-| L4 | Autonomous 🔧 | gc-scan 0 critical × 3 + Loop updates (built-in) |
+| **L2** | **Feedback** | **PreToolUse + SessionStart + Stop + ≥3 reviews ← Out of the box** |
+| L3 | Auto-Correction 🔧 | PostToolUse + PreCompact auto-format (manual enable) |
+| L4 | Autonomous 🔧 | gc-scan 0 critical × 3 + Loop updates |
 | L5 | Loop Engineering 🔄 | External scheduling + Maker/Checker separation (built-in) |
 
-> Details → `.claude/references/maturity-roadmap.md`
+> Details → GitHub repo `.claude/references/maturity-roadmap.md`
 
 ---
 
@@ -270,7 +272,7 @@ node scripts/gc-scan.mjs
 node scripts/upgrade.mjs --dry-run
 ```
 
-8 deterministic dimensions: CLAUDE.md completeness, Git status, TODO/FIXME density, .gitignore health, Hook registration, Harness state, TypeScript errors, LSP config. See `.claude/skills/harness-gc/SKILL.md`.
+8 deterministic dimensions: CLAUDE.md completeness, Git status, TODO/FIXME density, .gitignore health, Hook registration, Harness state, TypeScript errors, LSP config. See GitHub repo `.claude/skills/harness-gc/SKILL.md`.
 
 ### Template Upgrade
 
