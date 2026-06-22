@@ -25,36 +25,56 @@ https://github.com/chenklein26-maker/Harness-Starter
 
 ## 📜 Update History
 
-### 2026-06-23 — Slimming + Ponytail
+<details open>
+<summary><b>2026-06-23</b> — Slimming + Ponytail</summary>
 
-- **Slim core** — `npx` installs 14 L2 files only, L3+ on demand
-- **6-rung ladder** — YAGNI → stdlib → platform → existing deps → one line → minimum
-- **Format optimization** — Check-then-write, only touches broken files
-- **Controlled upgrades** — `node scripts/upgrade.mjs --dry-run`
-- **54 automated tests** — gc-scan, check, harness-context, init, upgrade
+| | |
+|---|---|
+| 🔧 | `npx` installs 14 L2 core files only, L3+ on demand |
+| 🧠 | Simplicity First → YAGNI → stdlib → platform → deps → one line → minimum |
+| ⚡ | Format check-then-write, only touches broken files |
+| 📦 | Controlled upgrades: `node scripts/upgrade.mjs --dry-run` |
+| 🧪 | 54 automated tests covering full toolchain |
 
-### 2026-06-15 — Major Refactor
+</details>
 
-- **5-hook lifecycle** — SessionStart → PreToolUse → PostToolUse → PreCompact → Stop
-- **Shared utility lib** — `harness-context.mjs` eliminates ~40 lines of duplication
-- **CLAUDE.md trimmed** — 146 → 60 lines, references split to `.claude/references/`
-- **Version tracking** — `.claude/.harness-version` + `upgrade.mjs --dry-run`
-- **Conditional OpenSpec** — Only triggers when `openspec/` exists
+<details open>
+<summary><b>2026-06-15</b> — Major Refactor</summary>
 
-### 2026-06-13 — Loop Engineering
+| | |
+|---|---|
+| 🔗 | 5-hook lifecycle: SessionStart → PreToolUse → PostToolUse → PreCompact → Stop |
+| 📚 | `harness-context.mjs` shared lib eliminates ~40 lines of duplication |
+| ✂️ | CLAUDE.md 146 → 60 lines, references split out |
+| 🏷️ | `.claude/.harness-version` version tracking |
+| 🎯 | Conditional OpenSpec: only triggers when `openspec/` exists |
 
-- **GC Autonomous Scan** — `node scripts/gc-scan.mjs`, 8 deterministic dimensions, no AI self-reporting
-- **Circuit Breaker** — 3× no improvement → auto-pause, waits for human
-- **State persistence** — STATE.md (hot) + LOG.md (cold), auto-loaded
-- **3 Loop templates** — Daily health check, PR babysit, self-evolution
-- **Maker/Checker separation** — Coding agent doesn't grade its own work
+</details>
 
-### 2026-06-01 — Initial Setup
+<details open>
+<summary><b>2026-06-13</b> — Loop Engineering</summary>
 
-- **4 core hooks** — PreToolUse + PostToolUse + SessionStart + Stop
-- **Karpathy principles** — 6 rules in CLAUDE.md
-- **Maturity roadmap** — L0→L5 tiered system
-- **Review reports** — Stop Hook auto-generates by date
+| | |
+|---|---|
+| 🔁 | GC Autonomous Scan: `node scripts/gc-scan.mjs`, 8 deterministic dimensions |
+| 🛑 | Circuit Breaker: 3× no improvement → auto-pause |
+| 💾 | State persistence: STATE.md (hot) + LOG.md (cold) |
+| 🧩 | 3 Loop templates: daily health, PR babysit, self-evolution |
+| ✅ | Maker/Checker separation: coder doesn't grade own work |
+
+</details>
+
+<details open>
+<summary><b>2026-06-01</b> — Initial Setup</summary>
+
+| | |
+|---|---|
+| 🪝 | 4 core hooks: PreToolUse + PostToolUse + SessionStart + Stop |
+| 📖 | 6 Karpathy principles in CLAUDE.md |
+| 🗺️ | Maturity roadmap: L0→L5 tiered system |
+| 📋 | Stop Hook auto-generates review reports by date |
+
+</details>
 
 ---
 
