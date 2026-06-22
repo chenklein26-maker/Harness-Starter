@@ -1,21 +1,10 @@
 {
   "hooks": {
+    // L2 核心 Hook — 默认启用
     "PreToolUse": [
       {
         "type": "command",
         "command": "node .claude/hooks/pre-tool-check.mjs"
-      }
-    ],
-    "PostToolUse": [
-      {
-        "type": "command",
-        "command": "node .claude/hooks/post-tool-check.mjs"
-      }
-    ],
-    "PreCompact": [
-      {
-        "type": "command",
-        "command": "node .claude/hooks/pre-compact.mjs"
       }
     ],
     "SessionStart": [
@@ -30,6 +19,19 @@
         "command": "node .claude/hooks/session-review.mjs"
       }
     ]
+    // L3 进阶：取消注释以下 Hook 启用
+    // "PostToolUse": [
+    //   {
+    //     "matcher": "",
+    //     "hooks": [{"type": "command", "command": "node .claude/hooks/post-tool-check.mjs"}]
+    //   }
+    // ],
+    // "PreCompact": [
+    //   {
+    //     "matcher": "",
+    //     "hooks": [{"type": "command", "command": "node .claude/hooks/pre-compact.mjs"}]
+    //   }
+    // ]
   },
   "env": {
     "ENABLE_PROMPT_CACHING_1H": "1",

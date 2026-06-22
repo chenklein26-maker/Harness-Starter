@@ -105,58 +105,70 @@ cp -r .claude/ CLAUDE.md .lsp.json /path/to/your-project/
 flowchart LR
   A[SessionStart] --> B[PreToolUse]
   B --> C[工具调用]
-  D[PostToolUse] -.-> C
-  C --> E[响应]
-  E --> F[Stop]
-  G[PreCompact] -.->|压缩前| E
+  C --> D[响应]
+  D --> E[Stop]
 ```
 
-| Hook | 时机 | 职责 | 备注 |
-|------|------|------|------|
-| SessionStart | 新对话开始 | 注入 git 状态、历史审查 | 自动加载最近 5 次审查 |
-| PreToolUse | 工具执行前 | 安全拦截：.env 保护、危险命令 | tweak/design 模式放宽 |
-| PostToolUse | 编辑完成后 | 自动格式化代码 | 先 check 再 write，格式正确则跳过 |
-| PreCompact | 上下文压缩前 | 保存会话关键状态 | 防止长会话丢进度 |
-| Stop | 每次响应后 | 审查变更、生成报告 | 自动集成 GC 扫描结果 |
+| Hook | 时机 | 职责 | 级别 |
+|------|------|------|:---:|
+| SessionStart | 新对话开始 | 注入 git 状态 + 当前进度 | **L2 核心** |
+| PreToolUse | 工具执行前 | 安全拦截：.env 保护、危险命令 | **L2 核心** |
+| Stop | 每次响应后 | 审查变更、生成报告 | **L2 核心** |
+| PostToolUse 🔧 | 编辑完成后 | 自动格式化代码 | L3 可选 |
+| PreCompact 🔧 | 上下文压缩前 | 保存会话关键状态 | L3 可选 |
 
-> 所有 Hook 共享一个上下文工具库（`.claude/hooks/lib/harness-context.mjs`），
-> 消除重复逻辑，保持数据读取一致。
+> 🔧 L3+ 功能默认不启用，复制对应 Hook 文件并注册到 `settings.json` 即可。
 
 ---
 
 ## 项目结构
 
+**`npx harness-starter` 默认安装（L2 核心）：**
+
 ```
 your-project/
-├── CLAUDE.md                   AI 行为规则（~60 行，精简版）
+├── CLAUDE.md                   AI 行为规则（~70 行，含 6 级梯子）
 ├── .lsp.json                   LSP 配置
-├── package.json                npm 分发
-├── vitest.config.js            测试配置
-├── tests/                      54 个自动化测试
-│   ├── gc-scan.test.mjs        GC 扫描器测试（22 个）
-│   ├── check.test.mjs          健康检查测试
-│   ├── harness-context.test.mjs 共享库测试
-│   ├── init.test.mjs           安装器测试
-│   └── upgrade.test.mjs        升级脚本测试
+├── .gitignore                  忽略规则
 │
 ├── scripts/
 │   ├── check.mjs               安装健康检查
-│   ├── init.mjs                一键安装（写入版本标记）
-│   ├── gc-scan.mjs             8 维 GC 扫描器
-│   └── upgrade.mjs             智能升级（支持 --dry-run）
+│   └── init.mjs                一键安装
 │
-├── .claude/
-│   ├── settings.json           Hook 注册
-│   ├── .harness-state          阶段/模式感知
-│   ├── .harness-version        模板版本标记
-│   ├── hooks/
-│   │   ├── pre-tool-check.mjs  安全拦截（+ OpenSpec 可选检查）
-│   │   ├── post-tool-check.mjs 自动格式化（先 check 再 write）
-│   │   ├── session-context.mjs 上下文注入
-│   │   ├── session-review.mjs  变更审查
-│   │   ├── pre-compact.mjs     长会话保护
-│   │   └── lib/
-│   │       └── harness-context.mjs  共享数据读取层
+└── .claude/
+    ├── settings.json           Hook 注册（PostToolUse/PreCompact 默认注释）
+    ├── .harness-state          阶段/模式感知
+    ├── .harness-version        版本标记
+    ├── hooks/
+    │   ├── pre-tool-check.mjs  安全拦截
+    │   ├── session-context.mjs 上下文注入
+    │   ├── session-review.mjs  变更审查
+    │   └── lib/
+    │       └── harness-context.mjs  共享数据层
+    └── skills/
+        ├── harness-init/       AI 安装向导
+        └── harness-mode/       模式切换
+```
+
+**L3+ 可选功能（在 GitHub 仓库中，按需复制）：**
+
+```
+├── scripts/
+│   ├── gc-scan.mjs             GC 扫描器（L4）
+│   └── upgrade.mjs             智能升级（L3）
+│
+├── .claude/hooks/
+│   ├── post-tool-check.mjs     自动格式化（L3）
+│   └── pre-compact.mjs         长会话保护（L3）
+│
+├── .claude/skills/
+│   ├── harness-gc/             GC Agent（L4）
+│   ├── tech-review/            技术审查（L2+）
+│   └── verify-goal/            目标验证（L2+）
+│
+├── .claude/references/        参考文档
+├── tests/                      自动化测试（仅维护者）
+└── vitest.config.js
 │   ├── skills/
 │   │   ├── harness-init/       AI 安装向导
 │   │   ├── harness-mode/       工作流模式切换
@@ -231,7 +243,7 @@ cd /path/to/your-project && node scripts/check.mjs
 | L0 | 裸用 | 无模板，手动提示 |
 | L1 | 规则层 | CLAUDE.md + 行为准则 |
 | L2 | 反馈回路 | PreToolUse + SessionStart + Stop 已激活 |
-| **L3** | **自动修正** | **PostToolUse + PreCompact + 审查报告 ≥5 份 ← 开箱即用** |
+| **L2** | **反馈回路** | **PreToolUse + SessionStart + Stop + 审查报告 ≥3 份 ← 开箱即用** |
 | L4 | 自治系统 🔧 | gc-scan 连续 3 次 0 critical + Loop 持续更新（组件已内置） |
 | L5 | 循环工程 🔄 | 外循环调度 + Maker/Checker 分离（组件已内置） |
 

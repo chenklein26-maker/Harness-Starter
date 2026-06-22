@@ -22,11 +22,12 @@
     "vitest": "^2.1.9"
   },
   "files": [
-    ".claude/",
     "CLAUDE.md",
     ".lsp.json",
     ".gitignore",
-    "scripts/",
+    "scripts/init.mjs",
+    "scripts/check.mjs",
+    ".claude/",
     ".github/",
     "README.md",
     "README.en.md"

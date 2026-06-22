@@ -115,73 +115,70 @@ During a conversation lifecycle, hooks fire automatically in this order:
 flowchart LR
   A[SessionStart] --> B[PreToolUse]
   B --> C[Tool Call]
-  D[PostToolUse] -.-> C
-  C --> E[Response]
-  E --> F[Stop]
-  G[PreCompact] -.->|before compaction| E
+  C --> D[Response]
+  D --> E[Stop]
 ```
 
-| Hook | Timing | Purpose | Note |
-|------|--------|---------|------|
-| SessionStart | New session begins | Inject git status, review history | Loads last 5 reviews |
-| PreToolUse | Before tool execution | Safety: .env, dangerous commands | Relaxed in tweak/design mode |
-| PostToolUse | After edits | Auto-format code | Check-then-write; skips if already formatted |
-| PreCompact | Before context compaction | Preserve session state | Prevents progress loss in long sessions |
-| Stop | After each response | Audit changes, generate report | Auto-integrates GC scan results |
+| Hook | Timing | Purpose | Level |
+|------|--------|---------|:----:|
+| SessionStart | New session begins | Inject git status + progress | **L2 Core** |
+| PreToolUse | Before tool execution | Safety: .env, dangerous commands | **L2 Core** |
+| Stop | After each response | Audit changes, generate report | **L2 Core** |
+| PostToolUse 🔧 | After edits | Auto-format code | L3 optional |
+| PreCompact 🔧 | Before context compaction | Preserve session state | L3 optional |
 
-> All hooks share a common data layer (`.claude/hooks/lib/harness-context.mjs`),
-> eliminating duplicate logic and keeping data reads consistent.
+> 🔧 L3+ features are not installed by default. Copy the hook file and register in `settings.json` to enable.
 
 ---
 
 ## Project Structure
 
+**`npx harness-starter` default install (L2 Core):**
+
 ```
 your-project/
-├── CLAUDE.md                   AI behavior rules (~60 lines, lean)
+├── CLAUDE.md                   AI behavior rules (~70 lines, with 6-rung ladder)
 ├── .lsp.json                   LSP configuration
-├── package.json                npm distribution
-├── vitest.config.js            Test configuration
-├── tests/                      54 automated tests
-│   ├── gc-scan.test.mjs        GC scanner tests (22)
-│   ├── check.test.mjs          Health check tests
-│   ├── harness-context.test.mjs Shared lib tests
-│   ├── init.test.mjs           Installer tests
-│   └── upgrade.test.mjs        Upgrade script tests
+├── .gitignore
 │
 ├── scripts/
 │   ├── check.mjs               Health check
-│   ├── init.mjs                One-click install (writes version tag)
-│   ├── gc-scan.mjs             8-dimension GC scanner
-│   └── upgrade.mjs             Smart upgrade (supports --dry-run)
+│   └── init.mjs                One-click install
 │
-├── .claude/
-│   ├── settings.json           Hook registration
-│   ├── .harness-state          State awareness
-│   ├── .harness-version        Template version tag
-│   ├── hooks/
-│   │   ├── pre-tool-check.mjs  Safety (+ optional OpenSpec check)
-│   │   ├── post-tool-check.mjs Auto-formatter (check-then-write)
-│   │   ├── session-context.mjs Context injection
-│   │   ├── session-review.mjs  Change review
-│   │   ├── pre-compact.mjs     Long-session guard
-│   │   └── lib/
-│   │       └── harness-context.mjs  Shared data layer
-│   ├── skills/
-│   │   ├── harness-init/       AI setup workflow
-│   │   ├── harness-mode/       Workflow modes
-│   │   ├── harness-gc/         GC Agent
-│   │   ├── tech-review/        Technical decision review
-│   │   └── verify-goal/        Goal verification
-│   └── references/
-│       ├── maturity-roadmap.md     L0-L5 maturity
-│       ├── extension-catalog.md    Extension directory
-│       ├── goal-definition-guide.md Goal definition guide
-│       └── loop-templates.md       Loop automation templates
+└── .claude/
+    ├── settings.json           Hook registration (PostToolUse/PreCompact commented out)
+    ├── .harness-state          State awareness
+    ├── .harness-version        Version tag
+    ├── hooks/
+    │   ├── pre-tool-check.mjs  Safety interceptor
+    │   ├── session-context.mjs Context injection
+    │   ├── session-review.mjs  Change review
+    │   └── lib/
+    │       └── harness-context.mjs  Shared data layer
+    └── skills/
+        ├── harness-init/       AI setup workflow
+        └── harness-mode/       Workflow modes
+```
+
+**L3+ optional (available in GitHub repo, copy on demand):**
+
+```
+├── scripts/
+│   ├── gc-scan.mjs             GC scanner (L4)
+│   └── upgrade.mjs             Smart upgrade (L3)
 │
-├── .github/
-│   └── workflows/
-│       └── harness-check.yml   CI check + tests
+├── .claude/hooks/
+│   ├── post-tool-check.mjs     Auto-formatter (L3)
+│   └── pre-compact.mjs         Long-session guard (L3)
+│
+├── .claude/skills/
+│   ├── harness-gc/             GC Agent (L4)
+│   ├── tech-review/            Technical decision review (L2+)
+│   └── verify-goal/            Goal verification (L2+)
+│
+├── .claude/references/        Documentation
+├── tests/                      Automated tests (maintainers only)
+└── vitest.config.js
 ```
 
 ---
@@ -236,7 +233,7 @@ cd /path/to/your-project && node scripts/check.mjs
 | L0 | Bare | No template, manual prompting |
 | L1 | Rules | CLAUDE.md + behavior guidelines |
 | L2 | Feedback | PreToolUse + SessionStart + Stop |
-| **L3** | **Auto-Correction** | **PostToolUse + PreCompact + ≥5 reviews ← Out of the box** |
+| **L3** | **Auto-Correction** | **PostToolUse + PreCompact + ≥5 reviews （manual enable）** |
 | L4 | Autonomous 🔧 | gc-scan 0 critical × 3 + Loop updates (built-in) |
 | L5 | Loop Engineering 🔄 | External scheduling + Maker/Checker separation (built-in) |
 

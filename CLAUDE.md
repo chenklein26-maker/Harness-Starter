@@ -25,10 +25,20 @@
 - 不要自己判断"讨论已经够了"——问出口才算数
 - 用户明确同意执行后才动手，一次只做一件事
 
-## Simplicity First
-- 不多写一行没被要求的代码
-- 不加不需要的抽象、配置、灵活性
-- 如果写了 200 行但能缩成 50 行，重写
+## Simplicity First — 动手前先爬 6 级梯子
+
+动手前逐级检查，停在第 1 级能通过的台阶：
+
+| # | 原则 | 做法 |
+|---|------|------|
+| 1 | **YAGNI** | 这东西真的需要存在吗？不需要就跳过 |
+| 2 | **标准库** | JavaScript/Python/Rust 标准库能搞定？用它 |
+| 3 | **平台原生** | 浏览器/Node/OS 自带能力能满足？用 native |
+| 4 | **已有依赖** | 项目已经装的依赖能解决？复用，不新增 |
+| 5 | **一行** | 能一行写完？写一行 |
+| 6 | **最少** | 以上都不行 → 写最少代码，不加抽象和配置 |
+
+> 保留的安全区：边界校验、数据防丢、安全防护、无障碍 —— 这些不能"偷懒"。
 
 ## Surgical Changes
 - 只动必须动的代码，不顺手"改善"无关代码
@@ -48,7 +58,7 @@
 3. **有失败降级方案** — 设置停止条件，防止无限重试（3 轮未通过 → 停止并汇报）
 4. **目标分层** — 区分长期目标和本轮目标
 
-> 详细示例 → `.claude/references/goal-definition-guide.md`
+> 详细示例 → GitHub 仓库 `.claude/references/goal-definition-guide.md`
 
 # 全局约定
 
@@ -59,15 +69,23 @@
 
 # 自动审查闭环
 
-- **SessionStart** → 注入 git 状态 + Loop 状态 + 最近审查
+- **SessionStart** → 注入 git 状态 + 当前进度
 - **PreToolUse** → 拦截 .env 写入、危险操作
-- **PostToolUse** → 自动格式化（仅检测到格式问题时触发）
-- **PreCompact** → 保存会话状态快照（长会话保护）
-- **Stop** → 生成审查报告至 `.claude/reviews/`
+- **Stop** → 生成审查报告至 `.claude/reviews/`（按日期累积）
 
-# 进阶特性
+> L3 进阶：启用 PostToolUse（自动格式化）和 PreCompact（长会话保护）可形成完整闭环。详见 GitHub 仓库 README。
 
-- **GC Agent**：`node scripts/gc-scan.mjs` — 8 维确定性健康检查。详见 `.claude/skills/harness-gc/SKILL.md`
-- **Loop 自动化**：`/loop 24h "node scripts/gc-scan.mjs"` — 定时自治循环。模板见 `.claude/references/loop-templates.md`
-- **成熟度路线图**：L0 → L5，当前模板开箱即用 L3。详见 `.claude/references/maturity-roadmap.md`
-- **扩展功能目录**：Worktree 隔离、Routines、自定义 Hook/Skill。详见 `.claude/references/extension-catalog.md`
+# 进阶特性（按需启用）
+
+本模板默认安装 L2 核心。以下高级功能留在 GitHub 仓库中，到达对应成熟度后手动复制：
+
+| 级别 | 功能 | 安装方式 |
+|:---:|---|---------|
+| L3 | 自动格式化 (PostToolUse) | 复制 `.claude/hooks/post-tool-check.mjs` + 注册到 settings.json |
+| L3 | 长会话保护 (PreCompact) | 复制 `.claude/hooks/pre-compact.mjs` + 注册到 settings.json |
+| L4 | GC 自治扫描 | 复制 `scripts/gc-scan.mjs` + `.claude/skills/harness-gc/` |
+| L4 | 技术方案审查 | 复制 `.claude/skills/tech-review/` |
+| L4 | 目标验证 | 复制 `.claude/skills/verify-goal/` |
+| L5 | 循环工程 | 详见仓库 `.claude/references/loop-templates.md` |
+
+> 成熟度路线图：L0 → L5，详见 GitHub 仓库 `.claude/references/maturity-roadmap.md`
